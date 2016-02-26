@@ -1,0 +1,66 @@
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.container {
+    text-align: center;
+}
+
+.content {
+    text-align: center;
+}
+
+.title {
+    font-size: 46px;
+}
+
+table.board {
+    border: 5px solid;
+    color: black;
+    padding: 10px;
+}
+
+table.board th {
+    border: 1px solid black;
+    background-color: #EEE;
+    height: 25px;
+}
+
+table.board td {
+    height: 35px;
+    width: 35px;
+    border: 1px solid black;
+}
+
+table.board td.hit {
+    background: #FF0000;
+}
+
+table.board td.miss {
+    background: #0000FF;
+}
+
+table.board td.ship {
+    background: #000;
+}
+
+.left_board {
+    width: 400px;
+    float: left;
+}
+
+.right_board {
+    width: 400px;
+    float: right;
+}
+
+#boards_container {
+    width: 70%;
+    margin: 0 auto;
+}
