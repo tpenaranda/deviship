@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\App;
 
 class GameController extends Controller
 {
@@ -31,8 +32,10 @@ class GameController extends Controller
             [0,0,0,0,0,0,0,0,0,0],
         ];
 
-        $request->session()->put("playingBoardPlayer{$player}", $emptyBoardModel);
-        $request->session()->put("hitsPlayer{$player}", 0);
+        $request->session()->put("playingBoardPlayer1", $emptyBoardModel);
+        $request->session()->put("hitsPlayer1", 0);
+        $request->session()->put("playingBoardPlayer2", $emptyBoardModel);
+        $request->session()->put("hitsPlayer2", 0);
 
         $viewData = [
             'appName' => 'Battleship!',
@@ -59,7 +62,6 @@ class GameController extends Controller
 
     private function doPlayerInput($request)
     {
-
         $player = $request->player;
         $row = $request->row;
         $column = $request->column;
@@ -67,7 +69,7 @@ class GameController extends Controller
         $opponent = (1 == $player) ? 2 : 1;
         $opponentBoard = $this->getPlayerShipBoard($opponent);
         $playerBoard = $request->session()->get("playingBoardPlayer{$player}");
-        $playerHits = $request->session()->get("hitsPlayer{$player}");
+        $playerHits = $request->session()->get("hitsPlayer{$player}", 0);
 
         //Check against opponent an set the cell as hit/miss
         if (self::SHIP_INT == $opponentBoard[$row][$column]) {
@@ -77,9 +79,11 @@ class GameController extends Controller
             $playerBoard[$row][$column] = self::MISS_INT;
         }
 
-
         $playerHits = $request->session()->put("hitsPlayer{$player}", $playerHits);
         $request->session()->put("playingBoardPlayer{$player}", $playerBoard);
+
+        $pusher = App::make('pusher');
+        $pusher->trigger( 'deviship_channel', 'game_event', ['playsPlayer' => $opponent]);
     }
 
     private function renderBoard($boardModel)
@@ -132,9 +136,9 @@ class GameController extends Controller
 
     private function checkForAWinner($request)
     {
-        if ($request->session()->get("hitsPlayer1") >= self::HITS_TO_WIN_INT)
+        if ($request->session()->get("hitsPlayer1", 0) >= self::HITS_TO_WIN_INT)
             return 1;
-        if ($request->session()->get("hitsPlayer2") >= self::HITS_TO_WIN_INT)
+        if ($request->session()->get("hitsPlayer2", 0) >= self::HITS_TO_WIN_INT)
             return 2;
         return 0;
     }
