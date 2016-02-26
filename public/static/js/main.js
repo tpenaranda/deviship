@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $('body').on('click', '#opponent_board > table > tbody > tr > td', function() {
+    $('body').on('click', '#opponent_board > table > tbody > tr > td.white', function() {
         $('#boards_container').spin()
         $.ajax({
             url: '/input',
@@ -14,6 +14,9 @@ $(document).ready(function() {
                 },
             success: function(data) {
                 $('#boards_container').spin(false)
+                if (data.winner != 0) {
+                    alert('Player ' + data.winner + ' wins!')
+                }
                 $('#opponent_board').html(data.opponentBoard)
             },
             error: function(e) {

@@ -13,6 +13,7 @@ class GameController extends Controller
     const HIT_INT = 1;
     const MISS_INT = 2;
     const SHIP_INT = 3;
+    const HITS_TO_WIN_INT = 18;
 
     public function showBoards(Request $request, $player)
     {
@@ -31,6 +32,7 @@ class GameController extends Controller
         ];
 
         $request->session()->put("playingBoardPlayer{$player}", $emptyBoardModel);
+        $request->session()->put("hitsPlayer{$player}", 0);
 
         $viewData = [
             'appName' => 'Battleship!',
@@ -49,10 +51,10 @@ class GameController extends Controller
         $column = $request->column;
 
         $this->doPlayerInput($request);
-
+        $winner = $this->checkForAWinner($request);
         $currentBoard = $request->session()->get("playingBoardPlayer{$player}");
 
-        return response()->json(['opponentBoard' => $this->renderBoard($currentBoard)]);
+        return response()->json(['opponentBoard' => $this->renderBoard($currentBoard), 'winner' => $winner]);
     }
 
     private function doPlayerInput($request)
@@ -65,10 +67,18 @@ class GameController extends Controller
         $opponent = (1 == $player) ? 2 : 1;
         $opponentBoard = $this->getPlayerShipBoard($opponent);
         $playerBoard = $request->session()->get("playingBoardPlayer{$player}");
+        $playerHits = $request->session()->get("hitsPlayer{$player}");
 
         //Check against opponent an set the cell as hit/miss
-        $playerBoard[$row][$column] = (self::SHIP_INT == $opponentBoard[$row][$column]) ? self::HIT_INT : self::MISS_INT;
+        if (self::SHIP_INT == $opponentBoard[$row][$column]) {
+            $playerBoard[$row][$column] = self::HIT_INT;
+            $playerHits++;
+        } else {
+            $playerBoard[$row][$column] = self::MISS_INT;
+        }
 
+
+        $playerHits = $request->session()->put("hitsPlayer{$player}", $playerHits);
         $request->session()->put("playingBoardPlayer{$player}", $playerBoard);
     }
 
@@ -119,4 +129,14 @@ class GameController extends Controller
 
         return isset($playersShipsModel[$player]) ? $playersShipsModel[$player] : false;
     }
+
+    private function checkForAWinner($request)
+    {
+        if ($request->session()->get("hitsPlayer1") >= self::HITS_TO_WIN_INT)
+            return 1;
+        if ($request->session()->get("hitsPlayer2") >= self::HITS_TO_WIN_INT)
+            return 2;
+        return 0;
+    }
+
 }
