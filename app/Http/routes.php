@@ -30,7 +30,7 @@ Route::get('/games', function () {
 
 Route::group(['middleware' => ['web']], function () {
     Route::get('/games/{player}',
-      ['as' => 'show_board', 'uses' => 'GameController@showBoards']);
+      ['as' => 'show_boards', 'uses' => 'GameController@showBoards']);
     Route::post('/input',
       ['as' => 'player_input', 'uses' => 'GameController@playerInput']);
 });

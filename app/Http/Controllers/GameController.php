@@ -10,10 +10,14 @@ use App\Http\Controllers\Controller;
 class GameController extends Controller
 {
 
-    public function showBoards(Request $request)
+    const HIT_INT = 1;
+    const MISS_INT = 2;
+    const SHIP_INT = 3;
+
+    public function showBoards(Request $request, $player)
     {
 
-        $boardModel = [
+        $emptyBoardModel = [
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
             [0,0,0,0,0,0,0,0,0,0],
@@ -26,13 +30,13 @@ class GameController extends Controller
             [0,0,0,0,0,0,0,0,0,0],
         ];
 
-
-        $player = 1;
+        $request->session()->put("playingBoardPlayer{$player}", $emptyBoardModel);
 
         $viewData = [
             'appName' => 'Battleship!',
-            'opponentBoard' => $this->renderBoard($boardModel),
+            'opponentBoard' => $this->renderBoard($emptyBoardModel),
             'playerBoard' => $this->renderBoard($this->getPlayerShipBoard($player)),
+            'player' => $player,
             ];
 
         return view('home', $viewData);
@@ -40,8 +44,32 @@ class GameController extends Controller
 
     public function playerInput(Request $request)
     {
+        $player = $request->player;
+        $row = $request->row;
+        $column = $request->column;
 
-        return response()->json(['opponentBoard' => 'Test!']);
+        $this->doPlayerInput($request);
+
+        $currentBoard = $request->session()->get("playingBoardPlayer{$player}");
+
+        return response()->json(['opponentBoard' => $this->renderBoard($currentBoard)]);
+    }
+
+    private function doPlayerInput($request)
+    {
+
+        $player = $request->player;
+        $row = $request->row;
+        $column = $request->column;
+
+        $opponent = (1 == $player) ? 2 : 1;
+        $opponentBoard = $this->getPlayerShipBoard($opponent);
+        $playerBoard = $request->session()->get("playingBoardPlayer{$player}");
+
+        //Check against opponent an set the cell as hit/miss
+        $playerBoard[$row][$column] = (self::SHIP_INT == $opponentBoard[$row][$column]) ? self::HIT_INT : self::MISS_INT;
+
+        $request->session()->put("playingBoardPlayer{$player}", $playerBoard);
     }
 
     private function renderBoard($boardModel)

@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="title">{{ $appName or 'None'}}</div>
-    <div id="boards_container">
+    <div id="boards_container" data-player="{{ $player }}">
         <div class="left_board">
             Your Ships:<br>
             {!! $playerBoard !!}

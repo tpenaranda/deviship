@@ -8,9 +8,9 @@ $(document).ready(function() {
             timeout: 3000,
             data: {
                     _token              : $('#jqueryData').data('csrftoken'),
-                    player              : 'WhoKnowsSoFar...',
-                    column              : $(this).index(),
-                    row                 : $(this).closest('tr').index()
+                    player              : $('#boards_container').data('player'),
+                    row                 : $(this).closest('tr').index(),
+                    column              : $(this).index()
                 },
             success: function(data) {
                 $('#boards_container').spin(false)
