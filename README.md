@@ -1,2 +1,2 @@
-# deviship
-PHP Code Challenge for Deviget, Battleship.
+# Deviship
+PHP 5 Hours Code Challenge for Deviget, Battleship.
